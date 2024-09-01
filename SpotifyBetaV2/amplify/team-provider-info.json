@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-spotifybetav2-dev-84350-authRole",
+      "UnauthRoleArn": "arn:aws:iam::767398021274:role/amplify-spotifybetav2-dev-84350-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::767398021274:role/amplify-spotifybetav2-dev-84350-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-spotifybetav2-dev-84350-deployment",
+      "UnauthRoleName": "amplify-spotifybetav2-dev-84350-unauthRole",
+      "StackName": "amplify-spotifybetav2-dev-84350",
+      "StackId": "arn:aws:cloudformation:us-east-1:767398021274:stack/amplify-spotifybetav2-dev-84350/24df2fc0-5e17-11ef-9c42-0affec0c9af1",
+      "AmplifyAppId": "d2min3tbcjncpn"
+    },
+    "categories": {
+      "auth": {
+        "spotifybetav20a513583": {}
+      }
+    }
+  }
+}
