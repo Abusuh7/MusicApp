@@ -1,20 +1,56 @@
 <script setup>
 import { RouterLink } from "vue-router";
 import { useRouter } from "vue-router";
-// import { Authenticator } from "@aws-amplify/ui-vue";
-// import "@aws-amplify/ui-vue/styles.css";
+import { ref } from "vue";
+import { Amplify } from "aws-amplify";
+import awsconfig from "../aws-exports";
+import { signUp } from "aws-amplify/auth";
 
-// import { Amplify } from "aws-amplify";
-// import awsconfig from "../aws-exports";
 
-// Amplify.configure(awsconfig);
+
+
 
 const router = useRouter();
 
-const toggleSignup = () => {
-  router.push({ name: "signup" });
+
+const toggleSignin = () => {
+  router.push({ name: "signin" });
 };
 
+// await signUp({
+//     username: "testuser",
+//     password: "testpassword",
+//     options: {
+//         userAttributes: {
+//             email: "abc@gmail.com",
+//             'custom:role': 0,
+//         }
+//     }   
+// })
+
+const email = ref('');
+const username = ref('');
+const password = ref('');
+
+
+const signUpUser = async () => {
+  try {
+    await signUp({
+      username: username.value,
+      password: password.value,
+      options: {
+        userAttributes: {
+          email: email.value,
+            'custom:role': 0,
+        }
+        }
+    })
+    } catch (error) {
+        console.log('error signing up:', error);
+        }
+    }
+
+    Amplify.configure(awsconfig);
 </script>
 
 <template>
@@ -24,52 +60,35 @@ const toggleSignup = () => {
         <!-- Background -->
         <div
           class="absolute top-0 w-full h-full bg-gray-900"
-          style="background-size: 100%; background-repeat: no-repeat"
-          :style="{
-            backgroundImage:
-              'url(https://images.unsplash.com/photo-1420161900862-9a86fa1f5c79?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)',
-          }"
+          style="background-size: 100%; background-repeat: no-repeat;"
+          :style="{ backgroundImage: 'url(https://images.unsplash.com/photo-1420161900862-9a86fa1f5c79?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)' }"
         ></div>
         <!-- Form Container -->
         <div class="container mx-auto px-4 h-full">
           <div class="flex content-center items-center justify-center h-full">
             <div class="w-full lg:w-4/12 px-4">
-              <div
-                class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-gray-300 border-0"
-              >
+              <div class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-gray-300 border-0">
                 <div class="rounded-t mb-0 px-6 py-6">
                   <!-- Sign In With Socials -->
                   <div class="text-center mb-3">
-                    <h6 class="text-gray-600 text-sm font-bold">
-                      Sign in with
-                    </h6>
+                    <h6 class="text-gray-600 text-sm font-bold">Sign Up with</h6>
                   </div>
                   <div class="btn-wrapper text-center">
                     <!-- Github -->
                     <button
                       class="bg-white active:bg-gray-100 text-gray-800 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-2 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs"
                       type="button"
-                      style="transition: all 0.15s ease 0s"
+                      style="transition: all 0.15s ease 0s;"
                     >
-                      <img
-                        alt="GitHub"
-                        class="w-5 mr-1"
-                        src="../assets/img/github.svg"
-                      />
-                      Github
+                      <img alt="GitHub" class="w-5 mr-1" src="../assets/img/github.svg" /> Github
                     </button>
                     <!-- Google -->
                     <button
                       class="bg-white active:bg-gray-100 text-gray-800 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-1 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs"
                       type="button"
-                      style="transition: all 0.15s ease 0s"
+                      style="transition: all 0.15s ease 0s;"
                     >
-                      <img
-                        alt="Google"
-                        class="w-5 mr-1"
-                        src="../assets/img/google.svg"
-                      />
-                      Google
+                      <img alt="Google" class="w-5 mr-1" src="../assets/img/google.svg" /> Google
                     </button>
                   </div>
                   <hr class="mt-6 border-b-1 border-gray-400" />
@@ -87,14 +106,33 @@ const toggleSignup = () => {
                         class="block uppercase text-gray-700 text-xs font-bold mb-2"
                         for="email"
                       >
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        v-model="email"
+                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
+                        placeholder="Email"
+                        style="transition: all 0.15s ease 0s;"
+                      />
+                    </div>
+
+                    <!-- Username Input -->
+                    <div class="relative w-full mb-3">
+                      <label
+                        class="block uppercase text-gray-700 text-xs font-bold mb-2"
+                        for="email"
+                      >
                         Username
                       </label>
                       <input
                         id="username"
                         type="username"
+                        v-model="username"
                         class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                         placeholder="Enter Username"
-                        style="transition: all 0.15s ease 0s"
+                        style="transition: all 0.15s ease 0s;"
                       />
                     </div>
 
@@ -109,35 +147,24 @@ const toggleSignup = () => {
                       <input
                         id="password"
                         type="password"
+                        v-model="password"
                         class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
                         placeholder="Password"
-                        style="transition: all 0.15s ease 0s"
+                        style="transition: all 0.15s ease 0s;"
                       />
                     </div>
 
-                    <!-- Remember Me Checkbox -->
-                    <div>
-                      <label class="inline-flex items-center cursor-pointer">
-                        <input
-                          id="customCheckLogin"
-                          type="checkbox"
-                          class="form-checkbox border-0 rounded text-gray-800 ml-1 w-5 h-5"
-                          style="transition: all 0.15s ease 0s"
-                        />
-                        <span class="ml-2 text-sm font-semibold text-gray-700"
-                          >Remember me</span
-                        >
-                      </label>
-                    </div>
+                
 
                     <!-- Sign In Button -->
                     <div class="text-center mt-6">
                       <button
                         class="bg-gray-900 text-white active:bg-gray-700 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
                         type="button"
-                        style="transition: all 0.15s ease 0s"
+                        style="transition: all 0.15s ease 0s;"
+                        @click="signUpUser"
                       >
-                        Sign In
+                        Sign Up
                       </button>
                     </div>
                   </form>
@@ -145,13 +172,13 @@ const toggleSignup = () => {
                   <div class="flex justify-center mt-6">
                     <div class="text-center">
                       <button
-                        @click="toggleSignup"
+                        @click="toggleSignin"
                         class="text-gray-700 font-bold text-base  transition-colors duration-300"
                       >
                         <small
-                          >Don't have an account yet?
+                          >Already Have An Account?
                           <span class="text-blue-900 font-bold underline"
-                            >Sign Up</span
+                            >Sign In</span
                           ></small
                         >
                       </button>
@@ -166,3 +193,4 @@ const toggleSignup = () => {
     </main>
   </div>
 </template>
+

@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LandingView from "../views/Landing.vue";
-import UserDashboard from "../views/UserDashboard.vue";
-import AdminDashboard from "../views/AdminDashboard.vue";
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,15 +19,11 @@ const router = createRouter({
       component: () => import("../components/SignIn.vue"),
     },
     {
-      path: "/user-dashboard",
-      name: "UserDashboard",
-      component: UserDashboard,
-    },
-    {
-      path: "/admin-dashboard",
-      name: "AdminDashboard",
-      component: AdminDashboard,
-    },
+      path: "/signup",
+      name: "signup",
+      component: () => import("../components/SignUp.vue"),
+    }
+
   ],
 });
 
