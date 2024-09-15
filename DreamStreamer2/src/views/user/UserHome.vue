@@ -1,31 +1,38 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
-import { Authenticator } from "@aws-amplify/ui-vue";
-import "@aws-amplify/ui-vue/styles.css";
+import NavbarComponent from "../../components/LoggedNavbar.vue";
+import FooterComponent from "../../components/Footer.vue";
 
-import { Amplify } from "aws-amplify";
-import awsconfig from "../aws-exports";
-import NavbarComponent from "../components/LoggedNavbar.vue";
-import FooterComponent from "../components/Footer.vue";
+import { ref, onMounted } from "vue";
+import { fetchUserAttributes } from "aws-amplify/auth";
+import { getCurrentUser } from "aws-amplify/auth";
+import { fetchAuthSession } from "aws-amplify/auth";
 
-Amplify.configure(awsconfig);
+const user = ref({});
+const authSession = ref({});
+const errorMessage = ref("");
+const loggedUser = ref("");
+
+onMounted(async () => {
+  try {
+    const currentUser = await getCurrentUser();
+    const userAttributes = await fetchUserAttributes();
+    const authSessionData = await fetchAuthSession();
+
+    user.value = userAttributes;
+    authSession.value = authSessionData;
+    console.log("Current user:", currentUser.username);
+    loggedUser.value = currentUser.username;
+  } catch (error) {
+    errorMessage.value = error.message;
+  }
+});
+
+
 
 </script>
 
 <template>
-  <div class="auth-container">
-    <authenticator
-      class="auth-container-form"
-      variation="modal"
-      :social-providers="['apple', 'facebook', 'google']"
-    >
-      <template v-slot="{ user, signOut, Auth }">
-
-        <pre>{{ Auth  }}</pre>
-
-        <!-- <h1>Hello {{ user.username }}!</h1>
-        <button @click="signOut">Sign Out</button> -->
-        <div>
+    <div>
           <navbar-component></navbar-component>
           <main>
             <div
@@ -51,10 +58,11 @@ Amplify.configure(awsconfig);
                     <div class="pr-12">
                       <h1 class="text-white font-semibold text-4xl">
                         Welcome to DreamStreamer,
-                        {{
+                        <!-- {{
                           user.username.charAt(0).toUpperCase() +
                           user.username.slice(1)
-                        }}!
+                        }}! -->
+                        {{ loggedUser.charAt(0).toUpperCase() + loggedUser.slice(1) }}
                       </h1>
                       <p class="mt-4 text-lg text-gray-300">
                         “The true beauty of music is that it connects people. It
@@ -255,7 +263,7 @@ Amplify.configure(awsconfig);
                 <div class="flex flex-wrap items-center justify-center text-center mb-10">
                   <div class="w-full lg:w-6/12 px-4">
                     <h2 class="text-4xl font-semibold">
-                      Made For {{  user.username.charAt(0).toUpperCase() + user.username.slice(1) }}
+                      Made For User
                     </h2>
                     <p class="text-lg leading-relaxed m-4 text-gray-600">
                       Explore a world of music tailored to your unique tastes.
@@ -401,7 +409,7 @@ Amplify.configure(awsconfig);
                     <div class="px-6">
                       <img
                         alt="..."
-                        src="../assets/img/ariana.jpg"
+                        src="../../assets/img/ariana.jpg"
                         class="shadow-lg rounded-full max-w-full mx-auto"
                         style="max-width: 120px"
                       />
@@ -437,7 +445,7 @@ Amplify.configure(awsconfig);
                     <div class="px-6">
                       <img
                         alt="..."
-                        src="../assets/img/justin.jpeg"
+                        src="../../assets/img/justin.jpeg"
                         class="shadow-lg rounded-full max-w-full mx-auto"
                         style="max-width: 120px"
                       />
@@ -473,7 +481,7 @@ Amplify.configure(awsconfig);
                     <div class="px-6">
                       <img
                         alt="..."
-                        src="../assets/img/katty.webp"
+                        src="../../assets/img/katty.webp"
                         class="shadow-lg rounded-full max-w-full mx-auto"
                         style="max-width: 120px"
                       />
@@ -509,7 +517,7 @@ Amplify.configure(awsconfig);
                     <div class="px-6">
                       <img
                         alt="..."
-                        src="../assets/img/salena.webp"
+                        src="../../assets/img/salena.webp"
                         class="shadow-lg rounded-full max-w-full mx-auto"
                         style="max-width: 120px"
                       />
@@ -692,38 +700,4 @@ Amplify.configure(awsconfig);
           </main>
           <footer-component></footer-component>
         </div>
-      </template>
-    </authenticator>
-  </div>
 </template>
-
-<!-- <style scoped>
-.auth-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-image: url('https://images.unsplash.com/photo-1511367734837-f2956f0d8020?q=80&w=2005&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Replace with your image path */
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-.auth-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Black shade with 50% opacity */
-  z-index: 1;
-}
-
-.auth-container > * {
-  position: relative;
-  z-index: 2;
-  color: white; /* Ensure text is visible over the darkened background */
-}
-
-</style> -->

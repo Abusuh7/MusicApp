@@ -1,196 +1,149 @@
-<script setup>
-import { RouterLink } from "vue-router";
-import { useRouter } from "vue-router";
-import { ref } from "vue";
-import { Amplify } from "aws-amplify";
-import awsconfig from "../aws-exports";
-import { signUp } from "aws-amplify/auth";
-
-
-
-
-
-const router = useRouter();
-
-
-const toggleSignin = () => {
-  router.push({ name: "signin" });
-};
-
-// await signUp({
-//     username: "testuser",
-//     password: "testpassword",
-//     options: {
-//         userAttributes: {
-//             email: "abc@gmail.com",
-//             'custom:role': 0,
-//         }
-//     }   
-// })
-
-const email = ref('');
-const username = ref('');
-const password = ref('');
-
-
-const signUpUser = async () => {
-  try {
-    await signUp({
-      username: username.value,
-      password: password.value,
-      options: {
-        userAttributes: {
-          email: email.value,
-            'custom:role': 0,
-        }
-        }
-    })
-    } catch (error) {
-        console.log('error signing up:', error);
-        }
-    }
-
-    Amplify.configure(awsconfig);
-</script>
-
 <template>
-  <div class="auth-container">
-    <main>
-      <section class="absolute w-full h-full">
-        <!-- Background -->
-        <div
-          class="absolute top-0 w-full h-full bg-gray-900"
-          style="background-size: 100%; background-repeat: no-repeat;"
-          :style="{ backgroundImage: 'url(https://images.unsplash.com/photo-1420161900862-9a86fa1f5c79?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)' }"
-        ></div>
-        <!-- Form Container -->
-        <div class="container mx-auto px-4 h-full">
-          <div class="flex content-center items-center justify-center h-full">
-            <div class="w-full lg:w-4/12 px-4">
-              <div class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-gray-300 border-0">
-                <div class="rounded-t mb-0 px-6 py-6">
-                  <!-- Sign In With Socials -->
-                  <div class="text-center mb-3">
-                    <h6 class="text-gray-600 text-sm font-bold">Sign Up with</h6>
-                  </div>
-                  <div class="btn-wrapper text-center">
-                    <!-- Github -->
-                    <button
-                      class="bg-white active:bg-gray-100 text-gray-800 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-2 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs"
-                      type="button"
-                      style="transition: all 0.15s ease 0s;"
-                    >
-                      <img alt="GitHub" class="w-5 mr-1" src="../assets/img/github.svg" /> Github
-                    </button>
-                    <!-- Google -->
-                    <button
-                      class="bg-white active:bg-gray-100 text-gray-800 font-normal px-4 py-2 rounded outline-none focus:outline-none mr-1 mb-1 uppercase shadow hover:shadow-md inline-flex items-center font-bold text-xs"
-                      type="button"
-                      style="transition: all 0.15s ease 0s;"
-                    >
-                      <img alt="Google" class="w-5 mr-1" src="../assets/img/google.svg" /> Google
-                    </button>
-                  </div>
-                  <hr class="mt-6 border-b-1 border-gray-400" />
-                </div>
-
-                <!-- Sign In Form -->
-                <div class="flex-auto px-4 lg:px-10 py-10 pt-0">
-                  <div class="text-gray-500 text-center mb-3 font-bold">
-                    <small>Or sign in with credentials</small>
-                  </div>
-                  <form>
-                    <!-- Email Input -->
-                    <div class="relative w-full mb-3">
-                      <label
-                        class="block uppercase text-gray-700 text-xs font-bold mb-2"
-                        for="email"
-                      >
-                        Email
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        v-model="email"
-                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                        placeholder="Email"
-                        style="transition: all 0.15s ease 0s;"
-                      />
-                    </div>
-
-                    <!-- Username Input -->
-                    <div class="relative w-full mb-3">
-                      <label
-                        class="block uppercase text-gray-700 text-xs font-bold mb-2"
-                        for="email"
-                      >
-                        Username
-                      </label>
-                      <input
-                        id="username"
-                        type="username"
-                        v-model="username"
-                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                        placeholder="Enter Username"
-                        style="transition: all 0.15s ease 0s;"
-                      />
-                    </div>
-
-                    <!-- Password Input -->
-                    <div class="relative w-full mb-3">
-                      <label
-                        class="block uppercase text-gray-700 text-xs font-bold mb-2"
-                        for="password"
-                      >
-                        Password
-                      </label>
-                      <input
-                        id="password"
-                        type="password"
-                        v-model="password"
-                        class="border-0 px-3 py-3 placeholder-gray-400 text-gray-700 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full"
-                        placeholder="Password"
-                        style="transition: all 0.15s ease 0s;"
-                      />
-                    </div>
-
-                
-
-                    <!-- Sign In Button -->
-                    <div class="text-center mt-6">
-                      <button
-                        class="bg-gray-900 text-white active:bg-gray-700 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full"
-                        type="button"
-                        style="transition: all 0.15s ease 0s;"
-                        @click="signUpUser"
-                      >
-                        Sign Up
-                      </button>
-                    </div>
-                  </form>
-                  <!-- Forgot Password and Create New Account Links -->
-                  <div class="flex justify-center mt-6">
-                    <div class="text-center">
-                      <button
-                        @click="toggleSignin"
-                        class="text-gray-700 font-bold text-base  transition-colors duration-300"
-                      >
-                        <small
-                          >Already Have An Account?
-                          <span class="text-blue-900 font-bold underline"
-                            >Sign In</span
-                          ></small
-                        >
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div class="login-container">
+      <div class="login-form">
+        <h2>Login</h2>
+  
+        <!-- Username Input -->
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input
+            v-model="username"
+            type="text"
+            id="username"
+            placeholder="Enter Username"
+          />
         </div>
-      </section>
-    </main>
-  </div>
-</template>
-
+  
+        <!-- Password Input -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            v-model="password"
+            type="password"
+            id="password"
+            placeholder="Enter Password"
+          />
+        </div>
+  
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+  
+        <!-- Submit Button -->
+        <button @click="loginUser" :disabled="loading">
+          <span v-if="loading">Logging in...</span>
+          <span v-else>Login</span>
+        </button>
+      </div>
+    </div>
+  </template>
+  
+  <script setup>
+  import { ref } from "vue";
+  import { signIn, confirmSignUp, fetchAuthSession, fetchUserAttributes } from "aws-amplify/auth";
+  import { Amplify } from "aws-amplify";
+  import awsconfig from "../aws-exports"; // Import the aws-exports.js file
+  
+  Amplify.configure(awsconfig); // Configure Amplify with the generated settings
+  
+  // Define refs for user input and error messages
+  const username = ref("");
+  const password = ref("");
+  const verifcationCode = ref("");
+  const verifcationPopup = ref(false);
+  const errorMessage = ref("");
+  const loading = ref(false);
+  
+  // Function to log in the user
+  const loginUser = async () => {
+    errorMessage.value = ""; // Clear previous errors
+    loading.value = true; // Start loading state
+  
+    // Simple validation
+    if (!username.value || !password.value) {
+      errorMessage.value = "Username and password are required";
+      loading.value = false;
+      return;
+    }
+  
+    try {
+      const user = await signIn(username.value, password.value);
+      if (user.nextStep.signInStep === "") {
+        verifcationPopup.value = true;
+        await confirmSignUp(verifcationCode.value);
+        console.log("MFA required:", user);
+        return;
+      }
+      console.log("Successfully logged in:", user);
+      // Redirect or navigate to the desired page after successful login
+    } catch (error) {
+      console.error("Error signing in:", error);
+      errorMessage.value = error.message || "An error occurred during login.";
+    } finally {
+      loading.value = false; // Stop loading state
+    }
+  };
+  </script>
+  
+  <style scoped>
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+  }
+  
+  .login-form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  button[disabled] {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  button:hover:enabled {
+    background-color: #45a049;
+  }
+  
+  .error-message {
+    color: red;
+    margin-bottom: 10px;
+  }
+  </style>
+  

@@ -97,7 +97,7 @@ export default {
     },
 
     toggleSignin: function(){
-      router.push({name: 'signin'});
+      router.push("/signin");
     }
   }
 }
