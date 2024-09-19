@@ -1,38 +1,57 @@
 <template>
-  <div>
-    <h2>Create Artist</h2>
-    <div>
-      <label for="name">Name:</label>
-      <input v-model="name" type="text" id="name" placeholder="Enter artist name" />
-    </div>
+  <AdminHomeTest>
+    <div class="form-container">
+      <h2>Create Artist</h2>
 
-    <div>
-      <label for="status">Status:</label>
-      <input v-model="status" type="text" id="status" placeholder="Enter artist status" />
-    </div>
+      <!-- Success and Error Messages -->
+      <transition name="fade">
+        <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+      </transition>
+      <transition name="fade">
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      </transition>
 
-    <div>
-      <label for="avatar">Avatar:</label>
-      <input type="file" @change="handleFileChange" accept="image/*" />
-    </div>
+      <!-- Artist Form -->
+      <form @submit.prevent="createArtist">
+        <!-- Name -->
+        <div class="form-group">
+          <label for="name">Name:</label>
+          <input v-model="name" type="text" id="name" placeholder="Enter artist name" class="form-input" />
+        </div>
 
-    <button @click="createArtist">Create Artist</button>
+        <!-- Status -->
+        <div class="form-group">
+          <label for="status">Status:</label>
+          <input v-model="status" type="text" id="status" placeholder="Enter artist status" class="form-input" />
+        </div>
 
-    <div v-if="responseMessage">
-      <h3>Response</h3>
-      <p>{{ responseMessage }}</p>
+        <!-- Avatar Upload -->
+        <div class="form-group">
+          <label for="avatar">Avatar:</label>
+          <input type="file" @change="handleFileChange" accept="image/*" class="form-file-input" />
+        </div>
+
+        <!-- Submit Button with Loading Spinner -->
+        <button :disabled="isSubmitting" type="submit" class="form-button">
+          <span v-if="isSubmitting" class="spinner"></span>
+          <span v-else>Create Artist</span>
+        </button>
+      </form>
     </div>
-  </div>
+  </AdminHomeTest>
 </template>
 
 <script setup>
+import AdminHomeTest from '@/layouts/AdminHomeTest.vue';
 import { ref } from 'vue';
 
 const name = ref('');
 const status = ref('');
 const avatarFile = ref(null);
 const avatarBase64 = ref('');
-const responseMessage = ref('');
+const successMessage = ref('');
+const errorMessage = ref('');
+const isSubmitting = ref(false);
 
 // Handle file change (read the image and convert to Base64)
 const handleFileChange = (event) => {
@@ -44,14 +63,18 @@ const handleFileChange = (event) => {
     avatarBase64.value = e.target.result.split(',')[1]; // Only keep the base64 string part
   };
   reader.readAsDataURL(file);
-  console.log(avatarBase64.value);
 };
 
 // Function to create the artist
 const createArtist = async () => {
+  isSubmitting.value = true;
+  errorMessage.value = null;
+  successMessage.value = null;
+
   // Ensure all fields are filled in
   if (!name.value || !status.value || !avatarBase64.value || !avatarFile.value.type) {
-    responseMessage.value = 'Please fill in all fields and upload a valid image.';
+    errorMessage.value = 'Please fill in all fields and upload a valid image.';
+    isSubmitting.value = false;
     return;
   }
 
@@ -75,37 +98,120 @@ const createArtist = async () => {
 
     if (response.ok) {
       const responseData = await response.json();
-      responseMessage.value = `Success: ${responseData.message}, Artist ID: ${responseData.artistId}`;
+      successMessage.value = `Success: ${responseData.message}, Artist ID: ${responseData.artistId}`;
+      // Reset form
+      name.value = '';
+      status.value = '';
+      avatarBase64.value = '';
+      avatarFile.value = null;
     } else {
       const errorData = await response.json();
-      responseMessage.value = `Error: ${errorData.message}`;
+      errorMessage.value = `Error: ${errorData.message}`;
     }
   } catch (error) {
-    responseMessage.value = `Error: ${error.message}`;
+    errorMessage.value = `Error: ${error.message}`;
   }
+
+  isSubmitting.value = false;
 };
 </script>
 
 <style scoped>
-/* Add basic styling for the form */
-div {
-  margin-bottom: 10px;
+.form-container {
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
 label {
-  margin-right: 10px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
 }
-input {
-  padding: 5px;
-  margin-bottom: 10px;
+
+.form-input,
+.form-file-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
 }
+
+.form-input:focus,
+.form-file-input:focus {
+  border-color: #333;
+  outline: none;
+}
+
 button {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #333;
   color: white;
   border: none;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
 }
-button:hover {
-  background-color: #45a049;
+
+button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+button:hover:enabled {
+  background-color: #555;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.success-message {
+  color: green;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Fade-in and fade-out animation for messages */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Spinner for loading animation */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #333;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

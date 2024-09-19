@@ -1,43 +1,79 @@
 <template>
-  <div>
-    <h2>Create Song</h2>
-    <form @submit.prevent="createSong">
-      <label for="name">Song Name:</label>
-      <input v-model="song.name" type="text" id="name" required />
+  <AdminHomeTest>
+    <div class="form-container">
+      <h2>Create Song</h2>
 
-      <label for="genre">Genre:</label>
-      <select v-model="song.genre_id" required>
-        <option v-for="genre in genres" :key="genre.ID" :value="genre.ID">{{ genre.NAME }}</option>
-      </select>
+      <!-- Success and Error Messages -->
+      <transition name="fade">
+        <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
+      </transition>
+      <transition name="fade">
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      </transition>
 
-      <label for="artist">Artist:</label>
-      <select v-model="song.artist_id" required>
-        <option v-for="artist in artists" :key="artist.ID" :value="artist.ID">{{ artist.NAME }}</option>
-      </select>
+      <!-- Song Form -->
+      <form @submit.prevent="createSong">
+        <!-- Song Name -->
+        <div class="form-group">
+          <label for="name">Song Name:</label>
+          <input v-model="song.name" type="text" id="name" required class="form-input" />
+        </div>
 
-      <label for="songFile">Song File:</label>
-      <input @change="onSongFileChange" type="file" id="songFile" accept="audio/*" required />
-      <p v-if="uploading">Uploading song, please wait...</p>
+        <!-- Genre Dropdown -->
+        <div class="form-group">
+          <label for="genre">Genre:</label>
+          <select v-model="song.genre_id" required class="form-input">
+            <option v-for="genre in genres" :key="genre.ID" :value="genre.ID">{{ genre.NAME }}</option>
+          </select>
+        </div>
 
-      <label for="thumbnailFile">Thumbnail:</label>
-      <input @change="onThumbnailFileChange" type="file" id="thumbnailFile" accept="image/*" required />
+        <!-- Artist Dropdown -->
+        <div class="form-group">
+          <label for="artist">Artist:</label>
+          <select v-model="song.artist_id" required class="form-input">
+            <option v-for="artist in artists" :key="artist.ID" :value="artist.ID">{{ artist.NAME }}</option>
+          </select>
+        </div>
 
-      <p v-if="song.duration">Duration: {{ song.duration }} seconds</p>
+        <!-- Song File Upload -->
+        <div class="form-group">
+          <label for="songFile">Song File:</label>
+          <input @change="onSongFileChange" type="file" id="songFile" accept="audio/*" required class="form-input" />
+          <p v-if="uploading" class="loading-message">
+            <span class="spinner"></span>Uploading song, please wait...
+          </p>
+        </div>
 
-      <label for="status">Status:</label>
-      <select v-model="song.status" required>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
+        <!-- Thumbnail Upload -->
+        <div class="form-group">
+          <label for="thumbnailFile">Thumbnail:</label>
+          <input @change="onThumbnailFileChange" type="file" id="thumbnailFile" accept="image/*" required class="form-input" />
+        </div>
 
-      <button type="submit" :disabled="uploading">Create Song</button>
-    </form>
+        <!-- Duration -->
+        <p v-if="song.duration">Duration: {{ song.duration }} seconds</p>
 
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-  </div>
+        <!-- Status -->
+        <div class="form-group">
+          <label for="status">Status:</label>
+          <select v-model="song.status" required class="form-input">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <!-- Submit Button with Loading Spinner -->
+        <button :disabled="uploading || !song.songUrl" type="submit" class="form-button">
+          <span v-if="uploading" class="spinner"></span>
+          <span v-else>Create Song</span>
+        </button>
+      </form>
+    </div>
+  </AdminHomeTest>
 </template>
 
 <script setup>
+import AdminHomeTest from '@/layouts/AdminHomeTest.vue';
 import { ref } from 'vue';
 
 const song = ref({
@@ -48,12 +84,13 @@ const song = ref({
   duration: null,
   status: 'active',
   thumbnailFile: null,
-  thumbnailMimeType: '',  // Added MIME type field
+  thumbnailMimeType: '',
 });
 
 const genres = ref([]);
 const artists = ref([]);
 const errorMessage = ref(null);
+const successMessage = ref(null);
 const uploading = ref(false);
 
 // Fetch genres and artists for dropdowns
@@ -102,9 +139,6 @@ const onSongFileChange = async (event) => {
 
       const { uploadUrl, songUrl } = await presignResponse.json();
 
-      console.log("uploadUrl", uploadUrl);
-      console.log("songUrl", songUrl);
-
       // Step 2: Upload song to S3 using the pre-signed URL
       await fetch(uploadUrl, {
         method: 'PUT',
@@ -113,7 +147,6 @@ const onSongFileChange = async (event) => {
 
       // Store song URL for form submission
       song.value.songUrl = songUrl;
-
       uploading.value = false;
     } catch (error) {
       errorMessage.value = 'Error uploading song';
@@ -131,16 +164,14 @@ const createSong = async () => {
 
   const payload = {
     name: song.value.name,
-    genreId: song.value.genre_id,  // Changed to match Lambda expectation
-    artistId: song.value.artist_id,  // Changed to match Lambda expectation
+    genreId: song.value.genre_id,
+    artistId: song.value.artist_id,
     songUrl: song.value.songUrl,
     thumbnailBase64: song.value.thumbnailFile,
-    thumbnailMimeType: song.value.thumbnailMimeType,  // Added MIME type field
+    thumbnailMimeType: song.value.thumbnailMimeType,
     duration: song.value.duration,
     status: song.value.status,
   };
-
-  console.log("Sending payload:", payload);
 
   const apiUrl = 'https://drj8e1e679.execute-api.ap-southeast-1.amazonaws.com/dev/songAdd';
 
@@ -155,7 +186,7 @@ const createSong = async () => {
       const errorData = await response.json();
       errorMessage.value = `Error: ${errorData.message}`;
     } else {
-      alert('Song created successfully!');
+      successMessage.value = 'Song created successfully!';
       // Reset form
       song.value = {
         name: '',
@@ -178,21 +209,94 @@ fetchGenresAndArtists();
 </script>
 
 <style scoped>
-label {
-  display: block;
-  margin-top: 10px;
+.form-container {
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-input,
-select {
-  margin-bottom: 10px;
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
 }
 
 button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+}
+
+button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+button:hover:enabled {
+  background-color: #555;
+}
+
+.success-message {
+  color: green;
+  text-align: center;
   margin-top: 10px;
 }
 
-p {
+.error-message {
   color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* Fade-in and fade-out animation for messages */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Spinner for loading animation */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 4px solid #333;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

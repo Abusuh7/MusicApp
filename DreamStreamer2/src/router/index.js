@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import LandingPage from "../views/HomeView.vue";
-import { fetchUserAttributes } from "aws-amplify/auth"
+import { getCurrentUser, fetchUserAttributes } from "aws-amplify/auth"
 // authenticated users can access this route
 
 const router = createRouter({
@@ -24,62 +24,131 @@ const router = createRouter({
     {
       path: "/userhome",
       name: "userhome",
-      component: () => import("../views/user/UserHome.vue"),
+      component: () => import("../layouts/UserHomePageTest.vue"),
+      meta: { requiresAuth: true, role: 'user' }, // Requires user role
+      children: [
+        {
+          path: "",
+          name: "userhomehome",
+          component: () => import("../views/user/UserHome.vue"),
+        },
+        {
+          path: "/favorites",
+          name: "userfavorites",
+          component: () => import("../views/user/UserFavourite.vue"),
+        },
+        
+      ],
     },
-
+    {
+      path: "/albumdetails/:albumId",
+      name: "albumdetails",
+      component: () => import("../views/user/AlbumDetails.vue"),
+    },
+    {
+      path: "/songdetails/:songId",
+      name: "songdetails",
+      component: () => import("../views/user/SongDetails.vue"),
+    },
     {
       path: "/adminhome",
       name: "adminhome",
-      component: () => import("../views/admin/AdminHome.vue"),
+      component: () => import("../layouts/AdminHomeTest.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/addartist",
       name: "addartist",
       component: () => import("../views/admin/AddArtist.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/viewartists",
       name: "viewartists",
       component: () => import("../views/admin/ViewAllArtist.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/addgenre",
       name: "addgenre",
       component: () => import("../views/admin/AddGenre.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/viewgenres",
       name: "viewgenres",
       component: () => import("../views/admin/ViewAllGenre.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/addsongs",
       name: "addsongs",
       component: () => import("../views/admin/AddSong.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/viewsongs",
       name: "viewsongs",
       component: () => import("../views/admin/ViewAllSongs.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
+    },
+    {
+      path: "/adminhome/addalbum",
+      name: "addalbum",
+      component: () => import("../views/admin/AddAlbum.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
+    },
+    {
+      path: "/adminhome/viewalbums",
+      name: "viewalbums",
+      component: () => import("../views/admin/ViewAllAlbum.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     }
-    
   ],
 });
 
-router.beforeEach((to, from, next) => {
-  if (to.name !== 'signin' && to.name !== 'signup' && to.name !== 'home') {
-    fetchUserAttributes().then((user) => {
-      if (user) {
-        next();
-      } else {
-        router.push("/signin");
-        console.log("User not signed in");
-      }
-    });
-  } else {
-    next();
+// Add route guard to check for authentication and role-based access
+router.beforeEach(async (to, from, next) => {
+  const publicPages = ['signin', 'signup', 'home']; // List of public routes
+  const authRequired = to.matched.some(record => record.meta.requiresAuth); // Check if route requires authentication
+  let authenticated = false;
+  let userRole = null;
+
+  try {
+    // Check if the user is authenticated
+    const user = await getCurrentUser();
+    authenticated = true;
+
+    // Fetch user's custom:role from their attributes
+    const attributes = await fetchUserAttributes();
+    userRole = attributes["custom:role"];
+
+    console.log('User is authenticated with role:', userRole);
+  } catch (error) {
+    // User is not authenticated
+    authenticated = false;
+    console.log('User is not authenticated');
   }
-}
-);
+
+  if (authRequired && !authenticated) {
+    // Redirect to login page if trying to access a protected route without being authenticated
+    next({ name: 'signin' });
+  } else if (authRequired && authenticated) {
+    const requiredRole = to.meta.role;
+
+    // Check if the user has access to the route based on their role
+    if (
+      (requiredRole === 'admin' && userRole !== '1') || // Admin role check
+      (requiredRole === 'user' && userRole !== '0') // User role check
+    ) {
+      // Redirect if the user doesn't have the appropriate role
+      next({ name: 'signin' });
+    } else {
+      next(); // User has the correct role, allow access
+    }
+  } else {
+    next(); // Public route, no authentication required
+  }
+});
 
 export default router;
