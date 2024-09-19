@@ -37,24 +37,35 @@ const router = createRouter({
           name: "userfavorites",
           component: () => import("../views/user/UserFavourite.vue"),
         },
-        
+        {
+          path: "/albumdetails/:albumId",
+          name: "albumdetails",
+          component: () => import("../views/user/AlbumDetails.vue"),
+        },
+        {
+          path: "/moresongs",
+          name: "moresongs",
+          component: () => import("../views/user/MoreSongs.vue"),
+        },
+        {
+          path: "/morealbums",
+          name: "morealbums",
+          component: () => import("../views/user/MoreAlbums.vue"),
+        },
       ],
     },
-    {
-      path: "/albumdetails/:albumId",
-      name: "albumdetails",
-      component: () => import("../views/user/AlbumDetails.vue"),
-    },
-    {
-      path: "/songdetails/:songId",
-      name: "songdetails",
-      component: () => import("../views/user/SongDetails.vue"),
-    },
+    
+    
     {
       path: "/adminhome",
       name: "adminhome",
       component: () => import("../layouts/AdminHomeTest.vue"),
       meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
+    },
+    {
+      path: "/adminhome/analytics",
+      name: "analytics",
+      component: () => import("../views/admin/Analytics.vue"),
     },
     {
       path: "/adminhome/addartist",

@@ -1,5 +1,5 @@
 <template>
-    <UserNavbar />
+    <!-- <UserNavbar /> -->
     <div class="container">
       <div v-if="album" class="album-card">
         <!-- Album Art and Info -->
@@ -40,7 +40,7 @@
           </ul>
         </div>
   
-        <!-- Media Player Fixed at the Bottom (Reference Media Player) -->
+        <!-- Media Player Fixed at the Bottom -->
         <div v-if="currentSong" class="media-player">
           <div class="media-info">
             <img :src="currentSong.thumbnailUrl" alt="Thumbnail" class="w-16 h-16 rounded-full" />
@@ -75,7 +75,7 @@
   </template>
   
   <script setup>
-import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
+  import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
   
@@ -166,9 +166,23 @@ import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
     currentTime.value = audioPlayer.value.currentTime;
   };
   
-  // Seek to new position in song
+  // Seek functionality
   const seek = () => {
     audioPlayer.value.currentTime = currentTime.value;
+  };
+  
+  // Go to next song
+  const nextSong = () => {
+    const currentIndex = album.value.songs.findIndex(song => song.songId === currentSong.value.songId);
+    const nextIndex = (currentIndex + 1) % album.value.songs.length;
+    playSong(album.value.songs[nextIndex]);
+  };
+  
+  // Go to previous song
+  const previousSong = () => {
+    const currentIndex = album.value.songs.findIndex(song => song.songId === currentSong.value.songId);
+    const previousIndex = (currentIndex - 1 + album.value.songs.length) % album.value.songs.length;
+    playSong(album.value.songs[previousIndex]);
   };
   
   // Fetch the album on component mount
@@ -186,7 +200,7 @@ import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
   <style scoped>
   .container {
     font-family: 'Arial', sans-serif;
-    background-color: #f4f4f4;
+    background-color: #f9f9f9;
     padding: 10px;
     max-width: 100%;
     margin: 0 auto;
@@ -198,7 +212,7 @@ import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
   }
   
   .album-header {
@@ -270,7 +284,7 @@ import UserNavbar from '@/components/UserComponents/UserNavbar.vue';
     padding: 10px;
     border-radius: 5px;
     margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
   
   .song-thumbnail img {
