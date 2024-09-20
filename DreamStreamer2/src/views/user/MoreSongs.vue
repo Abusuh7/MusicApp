@@ -475,8 +475,8 @@ onMounted(() => {
   background-color: #2e3b4d;
   color: white;
   border: none;
-  padding: 13px;
-  border-radius: 100%;
+  padding: 14px;
+  border-radius: 50%;
   cursor: pointer;
   transition: background-color 0.2s;
 }

@@ -3,8 +3,8 @@
     <nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
       <div class="flex lg:flex-1">
         <a
-          class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-white"
-          href="https://www.creative-tim.com/learning-lab/tailwind-starter-kit#/presentation"
+          @click="toggleSignOut"
+          class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-white cursor-pointer"
         >
           DreamStreamer
         </a>
@@ -20,10 +20,17 @@
         <a href="/moresongs" class="text-sm font-semibold leading-6 text-gray-200">Browse</a>
         <a href="/library" class="text-sm font-semibold leading-6 text-gray-200">Library</a>
       </PopoverGroup>
-      <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-        <button @click="toggleSignOut" class="signout-btn flex items-center">
-          <i class="fa-solid fa-user" style="color: #ffffff;"></i>
-          <span>SignOut</span>
+      <div class="flex lg:flex-1 lg:justify-end items-center">
+        <!-- Sign Out Button -->
+        <button @click="toggleSignOut" class="signout-btn mr-3">
+          <i class="fa-solid fa-sign-out-alt" style="color: #ffffff;"></i>
+          <span>Sign Out</span>
+        </button>
+
+        <!-- Avatar Button -->
+        <button class="relative block h-10 w-10 rounded-full bg-gray-500 overflow-hidden focus:outline-none">
+          <span class="sr-only">User Avatar</span>
+          <img class="h-full w-full object-cover" src="/src/assets/userplaceholder.png" alt="User Avatar" />
         </button>
       </div>
     </nav>
@@ -34,8 +41,8 @@
       <DialogPanel class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
         <div class="flex items-center justify-between">
           <a
-            class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-white"
-            href="https://www.creative-tim.com/learning-lab/tailwind-starter-kit#/presentation"
+            @click="toggleSignOut"
+            class="text-sm font-bold leading-relaxed inline-block mr-4 py-2 whitespace-nowrap uppercase text-white cursor-pointer"
           >
             DreamStreamer
           </a>
@@ -65,14 +72,16 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { signOut } from 'aws-amplify/auth';
-import { ArrowLeftOnRectangleIcon, Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
 
 const router = useRouter();
+const mobileMenuOpen = ref(false);
+
+// Sign-out function
 const toggleSignOut = () => {
   signOut();
   router.push('/');
 };
-const mobileMenuOpen = ref(false);
 </script>
 
 <style scoped>
@@ -83,6 +92,8 @@ const mobileMenuOpen = ref(false);
   border-radius: 20px;
   transition: background-color 0.3s ease;
   font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .signout-btn:hover {
@@ -97,5 +108,27 @@ const mobileMenuOpen = ref(false);
 .signout-btn span {
   font-size: 1rem;
   margin-left: 10px;
+}
+
+.relative {
+  position: relative;
+}
+
+img {
+  display: block;
+  border-radius: 50%;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:hover {
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 </style>
