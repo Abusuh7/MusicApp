@@ -18,7 +18,7 @@
       <PopoverGroup class="hidden lg:flex lg:gap-x-12">
         <a href="/userhome" class="text-sm font-semibold leading-6 text-gray-200">Home</a>
         <a href="/moresongs" class="text-sm font-semibold leading-6 text-gray-200">Browse</a>
-        <a href="#" class="text-sm font-semibold leading-6 text-gray-200">Library</a>
+        <a href="/library" class="text-sm font-semibold leading-6 text-gray-200">Library</a>
       </PopoverGroup>
       <div class="hidden lg:flex lg:flex-1 lg:justify-end">
         <button @click="toggleSignOut" class="signout-btn flex items-center">
@@ -49,7 +49,7 @@
             <div class="space-y-2 py-6">
               <a href="/userhome" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Home</a>
               <a href="/moresongs" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Browse</a>
-              <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Library</a>
+              <a href="/library" class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Library</a>
             </div>
             <div class="py-6">
               <button @click="toggleSignOut" class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">Sign Out</button>

@@ -33,9 +33,9 @@ const router = createRouter({
           component: () => import("../views/user/UserHome.vue"),
         },
         {
-          path: "/favorites",
-          name: "userfavorites",
-          component: () => import("../views/user/UserFavourite.vue"),
+          path: "/library",
+          name: "userlibrary",
+          component: () => import("../views/user/Library.vue"),
         },
         {
           path: "/albumdetails/:albumId",
@@ -51,6 +51,11 @@ const router = createRouter({
           path: "/morealbums",
           name: "morealbums",
           component: () => import("../views/user/MoreAlbums.vue"),
+        },
+        {
+          path: "/perosnalalbumdetails/:albumId",
+          name: "personalalbumdetails",
+          component: () => import("../views/user/PersonalAlbumDetails.vue"),
         },
       ],
     },

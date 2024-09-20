@@ -20,6 +20,7 @@ import SongsView from '@/components/UserComponents/SongsView.vue';
 
 // Simulating fetching the user's name
 const userName = ref(''); // You can replace this with dynamic user data
+const userId = ref(''); // You can replace this with dynamic user data
 
 const showWelcome = ref(true);
 
@@ -35,6 +36,8 @@ onMounted(async () => {
   try {
     const user = await getCurrentUser();
     userName.value = user.username;
+    userId.value = user.userId;
+    console.log('User:', user);
   } catch (error) {
     console.error('Error fetching user:', error);
   }
