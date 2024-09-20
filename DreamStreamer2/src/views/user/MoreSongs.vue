@@ -10,7 +10,7 @@
         {{ successMessage }}
       </div>
     </transition>
-    <transition name="fade" mode="out-in">
+    <transition name="fade" mode="in-out">
       <div v-if="errorMessage" class="notification error">
         {{ errorMessage }}
       </div>
@@ -48,7 +48,7 @@
             <button @click="playSong(song)" class="action-btn like-btn">
               <i class="fa-regular fa-heart"></i>
             </button>
-            <button @click="playSong(song)" class="action-btn add-btn">
+            <button @click="openModal(song)" class="action-btn add-btn">
               <i class="fa-solid fa-plus"></i>
             </button>
           </div>
@@ -93,12 +93,34 @@
       </div>
       <audio ref="audioPlayer" class="w-full" @timeupdate="updateProgress" @ended="nextSong" />
     </div>
+
+    <!-- Add Song Modal -->
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal">
+        <h3 class="modal-title">Select an Album</h3>
+        <div class="custom-dropdown">
+          <div
+            v-for="album in albums"
+            :key="album.ID"
+            class="album-option"
+            @click="selectAlbum(album)"
+          >
+            <img :src="album.ALBUM_ART" alt="Album Art" class="album-art" />
+            <span>{{ album.NAME }}</span>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="addSongToAlbum" class="submit-btn">Add to Album</button>
+          <button @click="closeModal" class="close-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { getCurrentUser } from "aws-amplify/auth";
 
 const songs = ref([]);
 const currentSong = ref(null);
@@ -108,12 +130,22 @@ const searchQuery = ref("");
 let isPlaying = ref(false);
 let currentTime = ref(0);
 let audioDuration = ref(0);
-const isLoading = ref(true); // Add loading state
+const isLoading = ref(true);
+const userName = ref("");
+const userId = ref("");
+const albums = ref([]);
+
+// Modal-related data
+const showModal = ref(false);
+const selectedSong = ref(null);
+const selectedAlbum = ref(null);
+
 
 // Pagination Variables
 const currentPage = ref(1);
 const itemsPerPage = 6;
 
+// Fetch Songs
 const fetchSongs = async () => {
   try {
     const response = await fetch("https://drj8e1e679.execute-api.ap-southeast-1.amazonaws.com/dev/songViewAll");
@@ -121,9 +153,68 @@ const fetchSongs = async () => {
   } catch (error) {
     errorMessage.value = "Error fetching songs";
   } finally {
-    isLoading.value = false; // Stop loading once data is fetched
+    isLoading.value = false;
   }
 };
+
+  // Fetch all albums and their songs
+  const fetchAlbums = async (user_id) => {
+    try {
+      const response = await fetch(
+        `https://4tvu26kjyf.execute-api.ap-southeast-1.amazonaws.com/dev/viewAllPerosnalAlbum?user_id=${user_id}`
+      );
+      const data = await response.json();
+      albums.value = data;
+    } catch (error) {
+      errorMessage.value = "Error fetching albums";
+    }
+  };
+
+  // Add Song to Album
+const addSongToAlbum = async () => {
+  if (selectedSong.value && selectedAlbum.value) {
+    try {
+      const response = await fetch(
+        `https://4tvu26kjyf.execute-api.ap-southeast-1.amazonaws.com/dev/addSongPersonalAlbum?album_id=${selectedAlbum.value.ID}&song_id=${selectedSong.value.id}`,
+        {
+          method: "POST",
+        }
+      );
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Error adding song to album");
+      }
+    } catch (error) {
+      console.error("Error adding song to album:", error);
+      errorMessage.value = "Song already exists in the album.";
+      return;
+    }
+    console.log(`Adding song ID: ${selectedSong.value.id} to album ID: ${selectedAlbum.value.ID}`);
+    successMessage.value = `Song "${selectedSong.value.name}" added to album!`;
+    closeModal();
+  } else {
+    errorMessage.value = "Please select an album.";
+  }
+};
+
+  
+  onMounted(async () => {
+    try {
+      const user = await getCurrentUser();
+      userName.value = user.username;
+      userId.value = user.userId;
+  
+      if (userId.value) {
+        console.log("Fetching albums for user ID:", userId.value);
+        fetchAlbums(userId.value);
+      }else{
+        console.log("User ID not found");
+      }
+
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    }
+  });
 
 // Play a selected song
 const playSong = (song) => {
@@ -176,6 +267,26 @@ const previousSong = () => {
   playSong(songs.value[previousIndex]);
 };
 
+// Show Modal
+const openModal = (song) => {
+  selectedSong.value = song;
+  showModal.value = true;
+};
+
+// Close Modal
+const closeModal = () => {
+  showModal.value = false;
+  selectedSong.value = null;
+  selectedAlbum.value = null;
+};
+
+// Select Album
+const selectAlbum = (album) => {
+  selectedAlbum.value = album;
+};
+
+
+
 const filteredSongs = computed(() => {
   return songs.value.filter(
     (song) =>
@@ -216,7 +327,7 @@ onMounted(() => {
   border-radius: 12px;
   max-width: 100;
   margin: 0 auto;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* Header */
@@ -261,7 +372,7 @@ onMounted(() => {
 .spinner {
   border: 8px solid #f3f3f3;
   border-radius: 50%;
-  border-top: 8px solid #3498db;
+  border-top: 8px solid #1f2937;
   width: 50px;
   height: 50px;
   -webkit-animation: spin 1s linear infinite;
@@ -477,5 +588,125 @@ onMounted(() => {
 
 audio {
   display: none;
+}
+
+/* Global Container */
+.song-container {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f6f6f6;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 100;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
+  max-width: 90%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Album List */
+.custom-dropdown {
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.album-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.album-option:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.album-art {
+  width: 50px;
+  height: 50px;
+  margin-right: 15px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.submit-btn,
+.close-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  width: 45%;
+}
+
+.submit-btn {
+  background-color: #2e3b4d;
+  color: white;
+}
+
+.close-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.submit-btn:hover {
+  background-color: #1f2835;
+}
+
+.close-btn:hover {
+  background-color: #e53935;
+}
+
+/* Modal Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

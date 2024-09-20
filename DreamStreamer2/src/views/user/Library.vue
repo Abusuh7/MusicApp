@@ -1,9 +1,9 @@
 <template>
   <div class="max-w-lg mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6">My Playlist's</h1>
+    <!-- <h1 class="text-2xl font-bold mb-6">My Playlist's</h1> -->
 
     <!-- Button to Open Modal -->
-    <button @click="openModal" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+    <button @click="openModal" class="create-album-btn">
       Create New Album
     </button>
 
@@ -17,36 +17,36 @@
 
     <!-- Modal -->
     <div v-if="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-        <h2 class="text-xl font-bold mb-4">Create Personalized Album</h2>
+      <div class="modal-container">
+        <h2 class="modal-title">Create Personalized Album</h2>
 
         <form @submit.prevent="createPersonalAlbum">
           <!-- Album Name -->
-          <div class="mb-4">
-            <label for="album_name" class="block text-sm font-medium text-gray-700">Album Name</label>
+          <div class="form-group">
+            <label for="album_name" class="form-label">Album Name</label>
             <input
               type="text"
               v-model="album.album_name"
               id="album_name"
-              class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+              class="form-input"
               required
             />
           </div>
 
           <!-- Album Art Upload -->
-          <div class="mb-4">
-            <label for="album_art" class="block text-sm font-medium text-gray-700">Upload Album Art</label>
-            <input type="file" @change="onFileChange" id="album_art" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
+          <div class="form-group">
+            <label for="album_art" class="form-label">Upload Album Art</label>
+            <input type="file" @change="onFileChange" id="album_art" class="form-input" />
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+          <button type="submit" class="modal-submit-btn">
             Create Album
           </button>
         </form>
 
         <!-- Close Modal Button -->
-        <button @click="closeModal" class="mt-4 w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+        <button @click="closeModal" class="modal-close-btn">
           Close
         </button>
       </div>
@@ -164,5 +164,119 @@ const resetForm = () => {
 </script>
 
 <style scoped>
-/* Tailwind CSS is included in this example */
+/* Styling for the "Create New Album" Button */
+.create-album-btn {
+  background: linear-gradient(135deg, #566887 0%, #262d3c 100%);
+  color: white;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 30px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: inline-block;
+  text-align: center;
+  font-size: 16px;
+  width: 100%;
+}
+
+.create-album-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.create-album-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Modal Styling */
+.modal-container {
+  background-color: white;
+  padding: 30px;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  position: relative;
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #1f2937;
+}
+
+/* Form Group Styling */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 1rem;
+  color: #4b5563;
+  margin-bottom: 6px;
+  text-align: left;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
+}
+
+/* Modal Buttons */
+.modal-submit-btn {
+  background-color: #2e3b4d;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  width: 100%;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-submit-btn:hover {
+  background-color: #1f2834;
+}
+
+.modal-close-btn {
+  background-color: #ef4444;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  width: 100%;
+  font-weight: bold;
+  margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Modal Transition and Animation */
+.modal-container {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 </style>

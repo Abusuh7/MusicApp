@@ -10,7 +10,7 @@
               <strong>Tracks:</strong> {{ albumSongs.length }}
             </p>
             <div class="flex space-x-2">
-              <button class="action-button">
+              <button class="action-button" @click="openSongsModel">
                 <i class="fa fa-plus"></i>
               </button>
   
@@ -35,7 +35,7 @@
               </div>
               <div class="song-details">
                 <strong class="song-title">{{ song.NAME }}</strong>
-                <span class="song-duration">({{ song.DURATION }} seconds)</span>
+                <span class="song-duration">{{ getArtistName(song.ARTIST_ID) }}</span>
               </div>
               <!-- Play button for each song -->
               <button class="small-play-button" @click="playSong(song)">
@@ -66,9 +66,7 @@
             />
             <div class="song-details">
               <p class="song-name">{{ currentSong.NAME }}</p>
-              <p class="artist-name">
-                {{ getArtistName(currentSong.ARTIST_ID) }}
-              </p>
+              <p class="artist-name">{{ getArtistName(currentSong.ARTIST_ID) }}</p>
             </div>
           </div>
           <div class="media-controls">
@@ -105,6 +103,15 @@
       <!-- Error or Loading States -->
       <div v-else-if="error" class="error-message">{{ error }}</div>
       <div v-else class="loading-message">Loading...</div>
+  
+      <!-- Modal for Adding Songs -->
+      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+        <div class="modal">
+          <h3>Add New Songs to Album</h3>
+          <p>Select songs you want to add here.</p>
+          <button @click="closeModal" class="close-btn">Close</button>
+        </div>
+      </div>
     </div>
   </template>
   
@@ -124,6 +131,7 @@
   const artists = ref([]);
   const audioPlayer = ref(null);
   const albumId = ref(null);
+  const showModal = ref(false);
   
   // Fetch album details by albumId from the Lambda API
   const fetchAlbum = async (albumId) => {
@@ -137,6 +145,16 @@
     } catch (err) {
       error.value = "Error fetching album: " + err.message;
     }
+  };
+  
+  // Open the modal
+  const openSongsModel = () => {
+    showModal.value = true;
+  };
+  
+  // Close the modal
+  const closeModal = () => {
+    showModal.value = false;
   };
   
   // Remove a song from the album
@@ -247,7 +265,7 @@
   <style scoped>
   .container {
     font-family: "Arial", sans-serif;
-    background-color: #f9f9f9;
+    background-color: #ebebeb;
     padding: 10px;
     max-width: 100%;
     margin: 0 auto;
@@ -334,7 +352,39 @@
     cursor: pointer;
   }
   
-  /* Song List and Media Player Styles (kept the same) */
+  /* Modal Styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .close-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
   .song-list-container {
     margin-top: 30px;
   }
@@ -377,7 +427,7 @@
   
   .song-duration {
     color: #888;
-    margin-left: 10px;
+    font-size: small;
   }
   
   /* Small Play Button for Each Song */
