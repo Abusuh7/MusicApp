@@ -14,7 +14,7 @@
                 <i class="fa fa-plus"></i>
               </button>
   
-              <button class="action-button edit-button">
+              <button class="action-button edit-button" @click="openEditModel">
                 <i class="fa fa-edit"></i>
               </button>
             </div>
@@ -41,10 +41,7 @@
               <button class="small-play-button" @click="playSong(song)">
                 <i class="fa fa-play"></i>
               </button>
-              <button
-                class="small-play-button"
-                @click="removeSong(song.ID, albumId)"
-              >
+              <button class="small-play-button" @click="removeSong(song.ID, albumId)">
                 <i class="fa fa-trash"></i>
               </button>
             </li>
@@ -59,11 +56,7 @@
         <!-- Media Player Fixed at the Bottom -->
         <div v-if="currentSong" class="media-player">
           <div class="media-info">
-            <img
-              :src="currentSong.THUMBNAIL_URL"
-              alt="Thumbnail"
-              class="w-16 h-16 rounded-full"
-            />
+            <img :src="currentSong.THUMBNAIL_URL" alt="Thumbnail" class="w-16 h-16 rounded-full" />
             <div class="song-details">
               <p class="song-name">{{ currentSong.NAME }}</p>
               <p class="artist-name">{{ getArtistName(currentSong.ARTIST_ID) }}</p>
@@ -82,21 +75,9 @@
             </button>
           </div>
           <div class="progress-bar">
-            <input
-              type="range"
-              min="0"
-              :max="audioDuration"
-              v-model="currentTime"
-              @input="seek"
-              class="w-full"
-            />
+            <input type="range" min="0" :max="audioDuration" v-model="currentTime" @input="seek" class="w-full" />
           </div>
-          <audio
-            ref="audioPlayer"
-            class="w-full"
-            @timeupdate="updateProgress"
-            @ended="nextSong"
-          ></audio>
+          <audio ref="audioPlayer" class="w-full" @timeupdate="updateProgress" @ended="nextSong"></audio>
         </div>
       </div>
   
@@ -105,18 +86,50 @@
       <div v-else class="loading-message">Loading...</div>
   
       <!-- Modal for Adding Songs -->
-      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div v-if="showSongsModal" class="modal-overlay" @click.self="closeSongsModal">
         <div class="modal">
-          <h3>Add New Songs to Album</h3>
-          <p>Select songs you want to add here.</p>
-          <button @click="closeModal" class="close-btn">Close</button>
+          <h3 class="modal-title">Add Songs to Album</h3>
+  
+          <!-- Search bar for filtering songs -->
+          <div class="search-bar">
+            <input v-model="songSearchQuery" type="text" placeholder="Search songs..." class="search-input" />
+          </div>
+  
+          <!-- Scrollable song list -->
+          <div class="scrollable-song-list">
+            <div v-for="song in filteredSongs" :key="song.id" class="scrollable-song-item">
+              <img :src="song.thumbnail_url" alt="Thumbnail" class="song-thumbnail" />
+              <div class="song-info">
+                <strong>{{ song.name }}</strong>
+                <span>{{ song.artist_name }}</span>
+              </div>
+              <button class="small-add-button" @click="addSongToAlbum(song.id)">
+                Add
+              </button>
+            </div>
+          </div>
+  
+          <button @click="closeSongsModal" class="close-btn">Close</button>
+        </div>
+      </div>
+  
+      <!-- Modal for Editing Album Name -->
+      <div v-if="showEditModal" class="modal-overlay" @click.self="closeEditModal">
+        <div class="modal">
+          <h3>Edit Album Name</h3>
+          <div class="mb-4">
+            <label for="albumName" class="block text-sm font-medium text-gray-700">Album Name</label>
+            <input type="text" v-model="editedAlbumName" id="albumName" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
+          </div>
+          <button @click="updateAlbumName" class="update-btn">Update Album Name</button>
+          <button @click="closeEditModal" class="close-btn">Close</button>
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, onMounted } from "vue";
+  import { ref, onMounted, computed } from "vue";
   import { useRoute } from "vue-router";
   
   const album = ref(null);
@@ -131,7 +144,13 @@
   const artists = ref([]);
   const audioPlayer = ref(null);
   const albumId = ref(null);
-  const showModal = ref(false);
+  const songs = ref([]);
+  const songSearchQuery = ref("");
+  
+  // Modal state management
+  const showSongsModal = ref(false);
+  const showEditModal = ref(false);
+  const editedAlbumName = ref("");
   
   // Fetch album details by albumId from the Lambda API
   const fetchAlbum = async (albumId) => {
@@ -142,19 +161,78 @@
       const data = await response.json();
       album.value = data.album;
       albumSongs.value = data.songs || []; // Make sure albumSongs is an array
+      editedAlbumName.value = album.value.NAME; // Initialize with current album name
     } catch (err) {
       error.value = "Error fetching album: " + err.message;
     }
   };
   
-  // Open the modal
+  // Open the modal to add songs
   const openSongsModel = () => {
-    showModal.value = true;
+    showSongsModal.value = true;
   };
   
-  // Close the modal
-  const closeModal = () => {
-    showModal.value = false;
+  // Close the modal to add songs
+  const closeSongsModal = () => {
+    showSongsModal.value = false;
+  };
+  
+  // Open the modal to edit album name
+  const openEditModel = () => {
+    showEditModal.value = true;
+  };
+  
+  // Close the modal to edit album name
+  const closeEditModal = () => {
+    showEditModal.value = false;
+  };
+  
+  // Update album name
+  const updateAlbumName = () => {
+    album.value.NAME = editedAlbumName.value;
+    closeEditModal();
+  };
+  
+  // Filtered Songs for the modal search
+  const filteredSongs = computed(() => {
+    return songs.value.filter((song) =>
+      song.name.toLowerCase().includes(songSearchQuery.value.toLowerCase()) ||
+      song.artist_name.toLowerCase().includes(songSearchQuery.value.toLowerCase())
+    );
+  });
+  
+  // Add song to album
+  const addSongToAlbum = async (songId) => {
+    try {
+      const response = await fetch(
+        `https://4tvu26kjyf.execute-api.ap-southeast-1.amazonaws.com/dev/addSongPersonalAlbum?album_id=${albumId.value}&song_id=${songId}`,
+        {
+          method: "POST",
+        }
+      );
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Error adding song to album");
+      }
+      fetchAlbum(albumId.value);
+    } catch (error) {
+      console.error("Error adding song to album:", error);
+      errorMessage.value = "Song already exists in the album.";
+      return;
+    }
+    // You can implement the actual logic here
+  };
+  
+  // Fetch songs from the API
+  const fetchSongs = async () => {
+    try {
+      const response = await fetch(
+        "https://drj8e1e679.execute-api.ap-southeast-1.amazonaws.com/dev/songViewAll"
+      );
+      songs.value = await response.json();
+    } catch (error) {
+      errorMessage.value = "Error fetching songs";
+    }
   };
   
   // Remove a song from the album
@@ -166,7 +244,6 @@
           method: "DELETE",
         }
       );
-      const data = await response.json();
       albumSongs.value = albumSongs.value.filter((song) => song.ID !== songId);
     } catch (err) {
       error.value = "Error removing song: " + err.message;
@@ -246,23 +323,21 @@
     const currentIndex = albumSongs.value.findIndex(
       (song) => song.ID === currentSong.value.ID
     );
-    const previousIndex =
-      (currentIndex - 1 + albumSongs.value.length) % albumSongs.value.length;
+    const previousIndex = (currentIndex - 1 + albumSongs.value.length) % albumSongs.value.length;
     playSong(albumSongs.value[previousIndex]);
   };
   
   // Fetch the album on component mount
   onMounted(() => {
-    albumId.value = route.params.albumId; // Default to albumId=1 if not provided
+    albumId.value = route.params.albumId;
     fetchAlbum(albumId.value);
-  });
-  
-  onMounted(() => {
     fetchGenresAndArtists();
+    fetchSongs();
   });
   </script>
   
   <style scoped>
+  /* Your existing styles */
   .container {
     font-family: "Arial", sans-serif;
     background-color: #ebebeb;
@@ -370,11 +445,14 @@
     background: white;
     padding: 20px;
     border-radius: 10px;
-    width: 400px;
+    width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   }
   
-  .close-btn {
+  .close-btn,
+  .update-btn {
     background-color: #e74c3c;
     color: white;
     padding: 10px;
@@ -385,6 +463,67 @@
     margin-top: 10px;
   }
   
+  .update-btn {
+    background-color: #222936;
+    margin-bottom: 10px;
+  }
+  
+  .search-bar {
+    margin-bottom: 15px;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .scrollable-song-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+  }
+  
+  .scrollable-song-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f1f1f1;
+    margin-bottom: 10px;
+    border-radius: 5px;
+  }
+  
+  .scrollable-song-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  
+  .song-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .song-info strong {
+    font-size: 16px;
+    color: #333;
+    margin-right: 10px;
+  }
+  
+  .small-add-button {
+    background-color: #222936;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  
+  /* Song List and Media Player Styles (same as your original) */
   .song-list-container {
     margin-top: 30px;
   }
@@ -430,7 +569,6 @@
     font-size: small;
   }
   
-  /* Small Play Button for Each Song */
   .small-play-button {
     background-color: #222936;
     color: white;
@@ -445,7 +583,6 @@
     margin: 5px;
   }
   
-  /* Media Player (Fixed at the Bottom) */
   .media-player {
     position: fixed;
     bottom: 0;
