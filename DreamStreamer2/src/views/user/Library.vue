@@ -144,6 +144,8 @@ const createPersonalAlbum = async () => {
       errorMessage.value = '';
       resetForm();
       closeModal(); // Close the modal after creation
+      //refresh the component PersonalAlbumView
+      // await PersonalAlbumView.methods.fetchAlbums(userId.value);
     } else {
       errorMessage.value = result.message || 'Failed to create album';
     }

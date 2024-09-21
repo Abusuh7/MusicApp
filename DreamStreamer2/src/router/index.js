@@ -61,16 +61,12 @@ const router = createRouter({
     },
     
     
+   
     {
       path: "/adminhome",
-      name: "adminhome",
-      component: () => import("../layouts/AdminHomeTest.vue"),
-      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
-    },
-    {
-      path: "/adminhome/analytics",
       name: "analytics",
       component: () => import("../views/admin/Analytics.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     },
     {
       path: "/adminhome/addartist",

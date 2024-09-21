@@ -25,7 +25,7 @@ const menuGroups = ref([
                 </svg>`,
         label: 'Dashboard',
         route: '#',
-        children: [{ label: 'Analytics', route: '/adminhome/analytics' }]
+        children: [{ label: 'Analytics', route: '/adminhome' }]
       },
       {
         icon: `<svg
