@@ -91,6 +91,22 @@ const menuGroups = ref([
         route: '#',
         children: [{ label: 'Create Album', route: '/adminhome/addalbum' }, { label: 'View Albums', route: '/adminhome/viewalbums' }]
       },
+      {
+        icon: `<svg
+                  class="fill-current"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6.10322 0.956299H2.53135C1.5751 0.956299 0.787598 1.7438 0.787598 2.70005V6.27192C0.787598 7.22817 1.5751 8.01567 2.53135 8.01567H6.10322C7.05947 8.01567 7.84697 7.22817 7.84697 6.27192V2.72817C7.8751 1.7438 7.0876 0.956299 6.10322 0.956299Z"
+                  />
+                </svg>`,
+        label: 'Users',
+        route: '#',
+        children: [{ label: 'Create Users', route: '/adminhome/addusers' }, { label: 'View Users', route: '/adminhome/viewusers' }]
+      },
       // {
       //   icon: `<svg
       //             class="fill-current"

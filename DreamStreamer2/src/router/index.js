@@ -115,6 +115,18 @@ const router = createRouter({
       name: "viewalbums",
       component: () => import("../views/admin/ViewAllAlbum.vue"),
       meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
+    },
+    {
+      path: "/adminhome/viewusers",
+      name: "viewusers",
+      component: () => import("../views/admin/ViewAllUsers.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
+    },
+    {
+      path: "/adminhome/addusers",
+      name: "addusers",
+      component: () => import("../views/admin/AddUsers.vue"),
+      meta: { requiresAuth: true, role: 'admin' }, // Requires admin role
     }
   ],
 });
