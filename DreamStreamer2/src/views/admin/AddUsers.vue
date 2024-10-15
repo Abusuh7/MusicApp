@@ -55,7 +55,7 @@
       const requestBody = {
         username: newUser.value.username,
         email: newUser.value.email,
-        password: "TempPassword123!",  // Default temporary password
+        password: "aaAA12!@",  // Default temporary password
         role: newUser.value.role
       };
   

@@ -119,7 +119,7 @@
             analytics.topArtistsBySongs.length > 0
           "
         >
-          <h2 class="section-title">Top Artists by Number of Songs</h2>
+          <h2 class="section-title">Top Artists</h2>
           <ul>
             <li
               v-for="(artist, index) in analytics.topArtistsBySongs"

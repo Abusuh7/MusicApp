@@ -12,8 +12,13 @@
         <b><a href="" class="show-all">Show all</a></b>
       </div>
 
+      <!-- Check if there are no albums -->
+      <div v-if="albums.length === 0" class="no-albums-message">
+        <p>No Albums Found</p>
+      </div>
+
       <!-- Album grid display (horizontal scroll) -->
-      <div class="album-grid-horizontal">
+      <div v-else class="album-grid-horizontal">
         <div v-for="album in albums" :key="album.ID" class="album-card">
           <img
             v-if="album.NAME"
@@ -27,7 +32,9 @@
           <!-- Album Name and Artist -->
           <div class="album-info">
             <h3 class="album-name">{{ album.NAME }}</h3>
-            <p class="artist-name">By {{ userName.charAt(0).toUpperCase() + userName.slice(1) }}</p>
+            <p class="artist-name">
+              By {{ userName.charAt(0).toUpperCase() + userName.slice(1) }}
+            </p>
           </div>
         </div>
       </div>
